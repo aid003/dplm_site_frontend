@@ -1,5 +1,6 @@
 import { Button } from "@/shared/ui/components/button";
 import Image from "next/image";
+import { ThemeToggle } from "@/shared/ui/components/theme-toggle";
 
 export default function Home() {
   return (
@@ -52,6 +53,7 @@ export default function Home() {
             Read our docs
           </a>
         </div>
+        <ThemeToggle />
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a

@@ -23,6 +23,11 @@ export const ROUTES = {
     build: () => "/project",
   } satisfies RouteDefNoParams,
 
+  projectCreate: {
+    pattern: "/project/create",
+    build: () => "/project/create",
+  } satisfies RouteDefNoParams,
+
   codeAnalysis: {
     pattern: "/code-analysis",
     build: () => "/code-analysis",
@@ -97,6 +102,7 @@ export function href<K extends RouteKey>(
 export const PATH = {
   home: ROUTES.home.build(),
   project: ROUTES.project.build(),
+  projectCreate: ROUTES.projectCreate.build(),
   codeAnalysis: ROUTES.codeAnalysis.build(),
   docs: ROUTES.docs.build(),
   settings: ROUTES.settings.build(),

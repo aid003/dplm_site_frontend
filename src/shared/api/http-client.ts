@@ -15,14 +15,19 @@ export type HttpRequestOptions = RequestInit & {
   method?: HttpMethod;
 };
 
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api").replace(/\/$/, "");
+// Используем локальный прокси для API вместо прямого обращения к серверу
+const API_BASE_URL = "/api";
 
 export async function httpRequest<TResponse>(
   path: string,
   { headers, ...init }: HttpRequestOptions = {}
 ): Promise<TResponse> {
+  // Определяем, является ли тело запроса FormData
+  const isFormData = init.body instanceof FormData;
+  
   const requestHeaders: HeadersInit = {
-    "Content-Type": "application/json",
+    // Не устанавливаем Content-Type для FormData - браузер сам установит multipart/form-data с boundary
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...headers,
   };
 
@@ -41,13 +46,11 @@ export async function httpRequest<TResponse>(
     .catch(() => undefined);
 
   if (!response.ok) {
-    throw new HttpError(
-      isJson && payload && typeof payload === "object" && "message" in payload
-        ? String((payload as { message?: string }).message ?? "Request failed")
-        : response.statusText || "Request failed",
-      response.status,
-      payload
-    );
+    const errorMessage = isJson && payload && typeof payload === "object" && "message" in payload
+      ? String((payload as { message?: string }).message ?? "Request failed")
+      : response.statusText || "Request failed";
+    
+    throw new HttpError(errorMessage, response.status, payload);
   }
 
   return (payload as TResponse) ?? (undefined as TResponse);

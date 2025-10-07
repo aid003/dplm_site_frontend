@@ -13,13 +13,20 @@ type SessionProviderProps = {
 
 export function SessionProvider({ children }: SessionProviderProps) {
   const status = useSessionSelector((state) => state.status);
-  const { setSession, clearSession } = useSessionActions();
+  const user = useSessionSelector((state) => state.user);
+  const { setSession, setStatus, clearSession } = useSessionActions();
 
   const sessionQuery = useQuery({
     queryKey: sessionQueryKeys.current(),
     queryFn: authApi.session,
     enabled: status === "unknown",
-    retry: false,
+    retry: (failureCount, error) => {
+      // Не повторяем запрос при 401 ошибке (пользователь не аутентифицирован)
+      if (error && typeof error === 'object' && 'status' in error && error.status === 401) {
+        return false;
+      }
+      return failureCount < 1;
+    },
     refetchOnWindowFocus: false,
   });
 
@@ -28,9 +35,15 @@ export function SessionProvider({ children }: SessionProviderProps) {
       setSession(sessionQuery.data);
     }
     if (sessionQuery.status === "error") {
-      clearSession();
+      // Если есть сохраненный пользователь, но сервер вернул ошибку,
+      // значит сессия истекла - очищаем локальное хранилище
+      if (user) {
+        clearSession();
+      } else {
+        setStatus("unauthenticated");
+      }
     }
-  }, [sessionQuery.status, sessionQuery.data, setSession, clearSession]);
+  }, [sessionQuery.status, sessionQuery.data, setSession, setStatus, clearSession, user]);
 
   return <>{children}</>;
 }

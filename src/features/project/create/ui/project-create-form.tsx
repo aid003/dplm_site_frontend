@@ -161,7 +161,7 @@ export function ProjectCreateForm() {
                   />
                 </FormControl>
                 <FormDescription>
-                  Загрузите архив проекта в формате .zip или .rar (максимум 100MB). Файл обязателен.
+                  Загрузите архив проекта в формате .zip или .rar (максимум 100MB).
                 </FormDescription>
                 <FormMessage />
               </FormItem>

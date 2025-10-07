@@ -6,19 +6,18 @@ import { useSessionActions } from "@/entities/session";
 
 export function useSignOutMutation() {
   const queryClient = useQueryClient();
-  const { clearSession, markUnknown } = useSessionActions();
+  const { clearSession } = useSessionActions();
 
   return useMutation({
     mutationFn: () => authApi.signOut(),
-    onMutate: () => {
-      markUnknown();
-    },
     onSuccess: () => {
       clearSession();
       queryClient.removeQueries({ queryKey: sessionQueryKeys.all(), exact: false });
     },
     onError: () => {
+      // Даже если запрос на сервер не удался, очищаем локальную сессию
       clearSession();
+      queryClient.removeQueries({ queryKey: sessionQueryKeys.all(), exact: false });
     },
   });
 }

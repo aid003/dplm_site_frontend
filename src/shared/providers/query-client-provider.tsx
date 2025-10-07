@@ -12,6 +12,10 @@ const defaultConfig: QueryClientConfig = {
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
+      // Кэшируем данные на 5 минут
+      staleTime: 5 * 60 * 1000,
+      // Храним данные в кэше до 10 минут
+      gcTime: 10 * 60 * 1000,
     },
     mutations: {
       retry: 0,

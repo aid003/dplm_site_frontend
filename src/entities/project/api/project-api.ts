@@ -42,7 +42,6 @@ export class ProjectAPI {
     return await httpRequest<ProjectResponse>(PROJECTS_API_BASE, {
       method: "POST",
       body: formData,
-      headers: {}, // Не устанавливаем Content-Type, браузер сам установит с boundary для FormData
     });
   }
 
@@ -57,7 +56,6 @@ export class ProjectAPI {
     return await httpRequest<ProjectResponse>(`${PROJECTS_API_BASE}/${id}`, {
       method: "PATCH",
       body: formData,
-      headers: {}, // Не устанавливаем Content-Type, браузер сам установит с boundary для FormData
     });
   }
 

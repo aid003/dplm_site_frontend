@@ -13,6 +13,8 @@ export function useSignUpMutation() {
     onSuccess: (session) => {
       setSession(session);
       queryClient.setQueryData(sessionQueryKeys.current(), session);
+      // Инвалидируем запрос сессии, чтобы обновить данные
+      queryClient.invalidateQueries({ queryKey: sessionQueryKeys.current() });
     },
   });
 }

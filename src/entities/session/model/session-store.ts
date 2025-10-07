@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
+import { devtools, persist } from "zustand/middleware";
 
 import type { SessionData, SessionStatus, SessionUser } from "./types";
 
@@ -26,29 +26,42 @@ export type SessionStore = SessionState & SessionActions;
 
 export const useSessionStore = create<SessionStore>()(
   devtools(
-    (set) => ({
-      ...initialState,
-      setSession: (session) =>
-        set(
-          {
-            user: session.user,
-            status: "authenticated",
-          },
-          false,
-          "session:setSession"
-        ),
-      setStatus: (status) => set({ status }, false, "session:setStatus"),
-      clearSession: () =>
-        set(
-          {
-            user: null,
-            status: "unauthenticated",
-          },
-          false,
-          "session:clearSession"
-        ),
-      markUnknown: () => set({ ...initialState }, false, "session:markUnknown"),
-    }),
+    persist(
+      (set) => ({
+        ...initialState,
+        setSession: (session) =>
+          set(
+            {
+              user: session.user,
+              status: "authenticated",
+            },
+            false,
+            "session:setSession"
+          ),
+        setStatus: (status) => set({ status }, false, "session:setStatus"),
+        clearSession: () =>
+          set(
+            {
+              user: null,
+              status: "unauthenticated",
+            },
+            false,
+            "session:clearSession"
+          ),
+        markUnknown: () => set({ ...initialState }, false, "session:markUnknown"),
+      }),
+      {
+        name: "session-storage",
+        // Сохраняем только пользователя, статус всегда начинается с "unknown"
+        partialize: (state) => ({ user: state.user }),
+        // При загрузке из localStorage устанавливаем статус "unknown" для проверки сессии
+        onRehydrateStorage: () => (state) => {
+          if (state) {
+            state.status = "unknown";
+          }
+        },
+      }
+    ),
     { name: "session" }
   )
 );

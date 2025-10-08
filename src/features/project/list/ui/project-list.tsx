@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, Filter, Code2 } from "lucide-react";
 
 import { Button } from "@/shared/ui/components/button";
 import { Input } from "@/shared/ui/components/input";
@@ -111,10 +111,20 @@ export function ProjectList() {
                 </p>
               )}
 
-              <div className="mt-4 pt-4 border-t">
+              <div className="mt-4 pt-4 border-t flex justify-between items-center">
                 <p className="text-xs text-muted-foreground">
                   Создан: {new Date(project.createdAt).toLocaleDateString()}
                 </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                >
+                  <TypedLink route="editor" params={{ projectId: project.id }}>
+                    <Code2 className="w-4 h-4 mr-2" />
+                    Редактировать
+                  </TypedLink>
+                </Button>
               </div>
             </div>
           ))}

@@ -55,3 +55,20 @@ export async function httpRequest<TResponse>(
 
   return (payload as TResponse) ?? (undefined as TResponse);
 }
+
+export const httpClient = {
+  get: <T>(path: string, options?: HttpRequestOptions) =>
+    httpRequest<T>(path, { method: 'GET', ...options }),
+
+  post: <T>(path: string, options?: HttpRequestOptions) =>
+    httpRequest<T>(path, { method: 'POST', ...options }),
+
+  put: <T>(path: string, options?: HttpRequestOptions) =>
+    httpRequest<T>(path, { method: 'PUT', ...options }),
+
+  patch: <T>(path: string, options?: HttpRequestOptions) =>
+    httpRequest<T>(path, { method: 'PATCH', ...options }),
+
+  delete: <T>(path: string, options?: HttpRequestOptions) =>
+    httpRequest<T>(path, { method: 'DELETE', ...options }),
+};

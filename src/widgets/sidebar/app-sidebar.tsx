@@ -6,15 +6,11 @@ import * as React from "react";
 import { usePathname } from "next/navigation";
 import {
   BookOpenText,
-  ChevronDown,
   Code2,
-  Database,
   FolderKanban,
-  History,
   Home,
   Plus,
   Settings,
-  Star
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -25,7 +21,6 @@ import {
 import {
   Collapsible,
   CollapsibleContent,
-  CollapsibleTrigger,
 } from "@/shared/ui/components/collapsible";
 import {
   Sidebar,
@@ -33,7 +28,6 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
@@ -52,15 +46,7 @@ type AppSidebarProps = {
 
 export function AppSidebar({ children }: AppSidebarProps) {
   const pathname = usePathname();
-  const [openGroups, setOpenGroups] = React.useState<string[]>(["main", "tools"]);
-
-  const toggleGroup = (groupId: string) => {
-    setOpenGroups(prev =>
-      prev.includes(groupId)
-        ? prev.filter(id => id !== groupId)
-        : [...prev, groupId]
-    );
-  };
+  // Collapsible state toggling is not used currently; remove unused state to satisfy linter
 
   const headerTitle = React.useMemo(() => {
     switch (pathname) {

@@ -43,6 +43,11 @@ export const ROUTES = {
     build: () => "/settings",
   } satisfies RouteDefNoParams,
 
+  editor: {
+    pattern: "/editor/:projectId",
+    build: (params: { projectId: string }) => `/editor/${params.projectId}`,
+  } satisfies RouteDefWithParams<{ projectId: string }>,
+
   authLogin: {
     pattern: "/auth/login",
     build: () => "/auth/login",

@@ -32,7 +32,7 @@ interface CursorPosition {
 }
 
 interface ActiveUser {
-  userId: number;
+  userId: string;
   userName: string;
   userEmail: string;
   filePath: string;

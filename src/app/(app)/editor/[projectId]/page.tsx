@@ -38,8 +38,21 @@ export default function EditorPage() {
   const loadFileTree = useCallback(async () => {
     try {
       setIsLoading(true);
+      console.log('Загружаем дерево файлов для проекта:', projectId);
       const response = await FileAPI.getFileTree(projectId, { lazy: true });
-      setFileTree(response.items);
+      console.log('Получен ответ от API:', response);
+      console.log('Тип ответа:', typeof response);
+      console.log('Ключи ответа:', Object.keys(response));
+      console.log('Количество файлов:', response.items?.length || 0);
+      console.log('Файлы:', response.items);
+      console.log('Total:', response.total);
+
+      // Проверяем структуру ответа
+      if (!response.items || !Array.isArray(response.items)) {
+        console.error('Неверная структура ответа API:', response);
+      }
+
+      setFileTree(response.items || []);
     } catch (error) {
       console.error('Failed to load file tree:', error);
       toast.error('Ошибка загрузки дерева файлов');
@@ -122,9 +135,12 @@ export default function EditorPage() {
       const params: CreateFileParams = {
         filePath: parentPath,
         name: fileName,
+        content: '// Тестовый файл\nconsole.log("Hello World");'
       };
 
+      console.log('Создаем файл с параметрами:', params);
       await FileAPI.createFile(projectId, params);
+      console.log('Файл создан успешно');
       toast.success('Файл создан');
       loadFileTree();
     } catch (error) {
@@ -144,7 +160,9 @@ export default function EditorPage() {
         name: folderName,
       };
 
+      console.log('Создаем папку с параметрами:', params);
       await FileAPI.createDirectory(projectId, params);
+      console.log('Папка создана успешно');
       toast.success('Папка создана');
       loadFileTree();
     } catch (error) {

@@ -33,6 +33,14 @@ export async function httpRequest<TResponse>(
 
   const url = `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 
+  console.log('HTTP Request:', {
+    method: init.method || 'GET',
+    url,
+    headers: requestHeaders,
+    body: init.body,
+    cookies: document.cookie
+  });
+
   const response = await fetch(url, {
     ...init,
     headers: requestHeaders,
@@ -45,11 +53,21 @@ export async function httpRequest<TResponse>(
     .text()
     .catch(() => undefined);
 
+  console.log('HTTP Response:', {
+    status: response.status,
+    statusText: response.statusText,
+    contentType,
+    payload: payload,
+    payloadType: typeof payload,
+    payloadKeys: payload && typeof payload === 'object' ? Object.keys(payload) : 'not object'
+  });
+
   if (!response.ok) {
     const errorMessage = isJson && payload && typeof payload === "object" && "message" in payload
       ? String((payload as { message?: string }).message ?? "Request failed")
       : response.statusText || "Request failed";
     
+    console.error('HTTP Error:', errorMessage, response.status, payload);
     throw new HttpError(errorMessage, response.status, payload);
   }
 

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>WebSocket Test</h1>
+    <div id="status">Disconnected</div>
+    <div id="logs"></div>
+
+    <script>
+        const projectId = '11';
+        const statusDiv = document.getElementById('status');
+        const logsDiv = document.getElementById('logs');
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logsDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            console.log(message);
+        }
+
+        log('Тестируем WebSocket подключение через фронтенд-прокси...');
+
+        // Тестируем подключение через фронтенд-прокси (порт 3000)
+        const socket = io('/projects', {
+            query: { projectId },
+            transports: ['websocket'],
+        });
+
+        socket.on('connect', () => {
+            log('✅ WebSocket подключен успешно!');
+            statusDiv.textContent = 'Connected';
+            statusDiv.style.color = 'green';
+
+            // Тестируем отправку сообщения
+            socket.emit('file_opened', { filePath: '/test/file.txt' });
+            log('📤 Отправлено сообщение file_opened');
+        });
+
+        socket.on('connect_error', (error) => {
+            log('❌ Ошибка подключения: ' + error.message);
+            statusDiv.textContent = 'Connection Error';
+            statusDiv.style.color = 'red';
+        });
+
+        socket.on('disconnect', (reason) => {
+            log('🔌 Отключено: ' + reason);
+            statusDiv.textContent = 'Disconnected';
+            statusDiv.style.color = 'orange';
+        });
+
+        socket.on('active_users', (data) => {
+            log('👥 Активные пользователи: ' + JSON.stringify(data.users));
+        });
+
+        socket.on('user_joined', (data) => {
+            log('🚪 Пользователь присоединился: ' + JSON.stringify(data));
+        });
+
+        socket.on('user_left', (data) => {
+            log('🚪 Пользователь вышел: ' + JSON.stringify(data));
+        });
+
+        socket.on('file_opened', (data) => {
+            log('📂 Файл открыт: ' + JSON.stringify(data));
+        });
+
+        // Тестируем прямое подключение к бэкенду через 5 секунд
+        setTimeout(() => {
+            log('Тестируем прямое подключение к бэкенду...');
+
+            const directSocket = io('ws://localhost:8000/projects', {
+                query: { projectId },
+                transports: ['websocket'],
+            });
+
+            directSocket.on('connect', () => {
+                log('✅ Прямое подключение к бэкенду успешно!');
+            });
+
+            directSocket.on('connect_error', (error) => {
+                log('❌ Ошибка прямого подключения к бэкенду: ' + error.message);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

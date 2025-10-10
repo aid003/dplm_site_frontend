@@ -157,7 +157,7 @@ export interface CompareVersionsParams {
 export interface WebSocketMessage {
   type: string;
   filePath?: string;
-  userId?: number;
+  userId?: string | number;
   timestamp?: string;
   cursor?: {
     line: number;
@@ -204,7 +204,7 @@ export interface FileModifiedMessage extends WebSocketMessage {
 
 export interface UserJoinedMessage extends WebSocketMessage {
   type: 'user_joined';
-  userId: number;
+  userId: string;
   userName: string;
   userEmail: string;
   timestamp: string;
@@ -212,14 +212,14 @@ export interface UserJoinedMessage extends WebSocketMessage {
 
 export interface UserLeftMessage extends WebSocketMessage {
   type: 'user_left';
-  userId: number;
+  userId: string;
   timestamp: string;
 }
 
 export interface ActiveUsersMessage extends WebSocketMessage {
   type: 'active_users';
   users: Array<{
-    userId: number;
+    userId: string;
     userName: string;
     userEmail: string;
     filePath: string;

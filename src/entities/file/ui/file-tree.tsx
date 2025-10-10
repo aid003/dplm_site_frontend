@@ -231,6 +231,9 @@ export function FileTree({
   className,
 }: FileTreeProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  
+  console.log('FileTree получил items:', items);
+  console.log('FileTree количество items:', items?.length || 0);
 
   const filteredItems = useMemo(() => {
     if (!searchTerm) return items;

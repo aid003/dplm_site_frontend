@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Debug</title>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>🔍 WebSocket Debug</h1>
+    <div id="status">Disconnected</div>
+    <div id="logs"></div>
+
+    <script>
+        const projectId = '11';
+        const statusDiv = document.getElementById('status');
+        const logsDiv = document.getElementById('logs');
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logsDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            console.log(message);
+        }
+
+        log('🚀 Starting WebSocket debug...');
+        log('📍 Current location: ' + window.location.href);
+        log('🔧 NEXT_PUBLIC_WS_URL: ' + (process?.env?.NEXT_PUBLIC_WS_URL || 'not available'));
+
+        // Тестируем подключение через фронтенд-прокси (рекомендуемый способ)
+        log('📡 Attempting connection via proxy (recommended)...');
+
+        const socket = io('/projects', {
+            query: { projectId },
+            transports: ['websocket', 'polling'],
+            forceNew: true,
+            timeout: 10000,
+        });
+
+        socket.on('connect', () => {
+            log('✅ SUCCESS: WebSocket connected via proxy!');
+            statusDiv.textContent = 'Connected via Proxy';
+            statusDiv.style.color = 'green';
+
+            // Тестируем отправку сообщения
+            socket.emit('file_opened', { filePath: '/test/file.txt' });
+            log('📤 Sent test message');
+        });
+
+        socket.on('disconnect', (reason) => {
+            log('❌ WebSocket disconnected: ' + reason);
+            statusDiv.textContent = 'Disconnected: ' + reason;
+            statusDiv.style.color = 'orange';
+        });
+
+        socket.on('connect_error', (error) => {
+            log('❌ CONNECTION ERROR: ' + error.message);
+            log('❌ Error details:', error);
+            statusDiv.textContent = 'Connection Error: ' + error.message;
+            statusDiv.style.color = 'red';
+
+            // Fallback: попробуем прямое подключение
+            setTimeout(() => {
+                log('🔄 Trying direct connection to backend...');
+                testDirectConnection();
+            }, 2000);
+        });
+
+        function testDirectConnection() {
+            const directSocket = io('ws://localhost:8000/projects', {
+                query: { projectId },
+                transports: ['websocket'],
+                forceNew: true,
+            });
+
+            directSocket.on('connect', () => {
+                log('✅ SUCCESS: Direct connection to backend works!');
+            });
+
+            directSocket.on('connect_error', (error) => {
+                log('❌ DIRECT CONNECTION ALSO FAILED: ' + error.message);
+            });
+        }
+
+        // Логируем все события для диагностики
+        socket.on('reconnect_attempt', (attempt) => {
+            log('🔄 Reconnection attempt #' + attempt);
+        });
+
+        socket.on('reconnect', (attempt) => {
+            log('✅ Reconnected after ' + attempt + ' attempts');
+        });
+
+        socket.on('reconnect_error', (error) => {
+            log('❌ Reconnection failed: ' + error.message);
+        });
+
+        // Тестируем получение сообщений
+        socket.on('active_users', (data) => {
+            log('👥 Active users: ' + JSON.stringify(data.users));
+        });
+
+        socket.on('user_joined', (data) => {
+            log('🚪 User joined: ' + JSON.stringify(data));
+        });
+
+        socket.on('file_opened', (data) => {
+            log('📂 File opened: ' + JSON.stringify(data));
+        });
+    </script>
+</body>
+</html>

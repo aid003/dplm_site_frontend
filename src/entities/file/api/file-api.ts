@@ -1,4 +1,4 @@
-import { httpClient, HttpRequestOptions } from '@/shared/api/http-client';
+import { httpRequest, HttpRequestOptions } from '@/shared/api/http-client';
 import type {
   FileTreeResponse,
   FileContent,
@@ -20,8 +20,7 @@ import type {
 } from '../model/types';
 
 export class FileAPI {
-  // ВАЖНО: базовый URL не должен включать '/api', так как
-  // 'http-client' уже добавляет '/api' через локальный прокси/rewrites.
+  // Используем путь к файловым операциям (HTTP клиент добавит /api)
   private static readonly BASE_URL = '/projects';
 
   /**
@@ -39,7 +38,7 @@ export class FileAPI {
       });
     }
 
-    return await httpClient.get<FileTreeResponse>(
+    return await httpRequest<FileTreeResponse>(
       `${this.BASE_URL}/${projectId}/files/tree?${searchParams.toString()}`
     );
   }
@@ -48,7 +47,7 @@ export class FileAPI {
    * Загрузка дочерних элементов папки
    */
   static async getChildren(projectId: string, folderPath: string): Promise<FileTreeResponse> {
-    return await httpClient.get<FileTreeResponse>(
+    return await httpRequest<FileTreeResponse>(
       `${this.BASE_URL}/${projectId}/files/tree/children?path=${encodeURIComponent(folderPath)}`
     );
   }
@@ -64,7 +63,7 @@ export class FileAPI {
       }
     });
 
-    return await httpClient.get<FileContent>(
+    return await httpRequest<FileContent>(
       `${this.BASE_URL}/${projectId}/files/content?${searchParams.toString()}`
     );
   }
@@ -73,9 +72,12 @@ export class FileAPI {
    * Сохранение содержимого файла
    */
   static async saveFile(projectId: string, params: SaveFileParams): Promise<FileContent> {
-    return await httpClient.put<FileContent>(
+    return await httpRequest<FileContent>(
       `${this.BASE_URL}/${projectId}/files/content`,
-      { body: JSON.stringify(params) } as HttpRequestOptions
+      { 
+        method: 'PUT',
+        body: JSON.stringify(params) 
+      } as HttpRequestOptions
     );
   }
 
@@ -83,35 +85,49 @@ export class FileAPI {
    * Создание файла
    */
   static async createFile(projectId: string, params: CreateFileParams): Promise<void> {
-    await httpClient.post(`${this.BASE_URL}/${projectId}/files/create-file`, { body: JSON.stringify(params) } as HttpRequestOptions);
+    await httpRequest(`${this.BASE_URL}/${projectId}/files/create-file`, { 
+      method: 'POST',
+      body: JSON.stringify(params) 
+    } as HttpRequestOptions);
   }
 
   /**
    * Создание папки
    */
   static async createDirectory(projectId: string, params: CreateDirectoryParams): Promise<void> {
-    await httpClient.post(`${this.BASE_URL}/${projectId}/files/create-directory`, { body: JSON.stringify(params) } as HttpRequestOptions);
+    await httpRequest(`${this.BASE_URL}/${projectId}/files/create-directory`, { 
+      method: 'POST',
+      body: JSON.stringify(params) 
+    } as HttpRequestOptions);
   }
 
   /**
    * Удаление файла/папки
    */
   static async deleteFile(projectId: string, filePath: string): Promise<void> {
-    await httpClient.delete(`${this.BASE_URL}/${projectId}/files?filePath=${encodeURIComponent(filePath)}`);
+    await httpRequest(`${this.BASE_URL}/${projectId}/files?filePath=${encodeURIComponent(filePath)}`, { 
+      method: 'DELETE' 
+    } as HttpRequestOptions);
   }
 
   /**
    * Перемещение файла/папки
    */
   static async moveFile(projectId: string, params: MoveFileParams): Promise<void> {
-    await httpClient.post(`${this.BASE_URL}/${projectId}/files/move`, { body: JSON.stringify(params) } as HttpRequestOptions);
+    await httpRequest(`${this.BASE_URL}/${projectId}/files/move`, { 
+      method: 'POST',
+      body: JSON.stringify(params) 
+    } as HttpRequestOptions);
   }
 
   /**
    * Копирование файла/папки
    */
   static async copyFile(projectId: string, params: CopyFileParams): Promise<void> {
-    await httpClient.post(`${this.BASE_URL}/${projectId}/files/copy`, { body: JSON.stringify(params) } as HttpRequestOptions);
+    await httpRequest(`${this.BASE_URL}/${projectId}/files/copy`, { 
+      method: 'POST',
+      body: JSON.stringify(params) 
+    } as HttpRequestOptions);
   }
 
   /**
@@ -125,7 +141,7 @@ export class FileAPI {
       }
     });
 
-    return await httpClient.get<FileHistoryResponse>(
+    return await httpRequest<FileHistoryResponse>(
       `${this.BASE_URL}/${projectId}/files/history?${searchParams.toString()}`
     );
   }
@@ -134,7 +150,10 @@ export class FileAPI {
    * Восстановление версии файла
    */
   static async restoreVersion(projectId: string, params: RestoreVersionParams): Promise<void> {
-    await httpClient.post(`${this.BASE_URL}/${projectId}/files/restore-version`, { body: JSON.stringify(params) } as HttpRequestOptions);
+    await httpRequest(`${this.BASE_URL}/${projectId}/files/restore-version`, { 
+      method: 'POST',
+      body: JSON.stringify(params) 
+    } as HttpRequestOptions);
   }
 
   /**
@@ -150,9 +169,12 @@ export class FileAPI {
       modified: number;
     };
   }> {
-    return await httpClient.post(
+    return await httpRequest(
       `${this.BASE_URL}/${projectId}/files/compare-versions`,
-      { body: JSON.stringify(params) } as HttpRequestOptions
+      { 
+        method: 'POST',
+        body: JSON.stringify(params) 
+      } as HttpRequestOptions
     );
   }
 
@@ -160,20 +182,26 @@ export class FileAPI {
    * Сохранение черновика
    */
   static async saveDraft(projectId: string, params: SaveDraftParams): Promise<void> {
-    await httpClient.post(`${this.BASE_URL}/${projectId}/files/draft`, { body: JSON.stringify(params) } as HttpRequestOptions);
+    await httpRequest(`${this.BASE_URL}/${projectId}/files/draft`, { 
+      method: 'POST',
+      body: JSON.stringify(params) 
+    } as HttpRequestOptions);
   }
 
   /**
    * Получение списка черновиков
    */
   static async getDrafts(projectId: string): Promise<DraftsResponse> {
-    return await httpClient.get<DraftsResponse>(`${this.BASE_URL}/${projectId}/files/drafts`);
+    return await httpRequest<DraftsResponse>(`${this.BASE_URL}/${projectId}/files/drafts`);
   }
 
   /**
    * Восстановление черновика
    */
   static async restoreDraft(projectId: string, params: RestoreDraftParams): Promise<void> {
-    await httpClient.post(`${this.BASE_URL}/${projectId}/files/restore-draft`, { body: JSON.stringify(params) } as HttpRequestOptions);
+    await httpRequest(`${this.BASE_URL}/${projectId}/files/restore-draft`, { 
+      method: 'POST',
+      body: JSON.stringify(params) 
+    } as HttpRequestOptions);
   }
 }
